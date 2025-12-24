@@ -1,0 +1,5 @@
+{
+  "name": "PainToProduct",
+  "description": "An AI-powered market research tool that discovers real user pain points from the web and converts them into viable Micro-SaaS app ideas.",
+  "requestFramePermissions": []
+}
