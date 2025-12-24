@@ -23,6 +23,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         setError(null);
 
         try {
+            if (!supabase) {
+                throw new Error('Authentication service is not configured. Please check your environment variables.');
+            }
+
             if (isSignUp) {
                 const { error } = await supabase.auth.signUp({
                     email,

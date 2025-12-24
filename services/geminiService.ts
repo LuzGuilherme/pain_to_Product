@@ -1,8 +1,13 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { AppIdea, PainPointResult, Source, BuildPlan } from "../types";
 
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
-const ai = new GoogleGenAI({ apiKey });
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
+if (!apiKey) {
+  console.error("Missing VITE_GEMINI_API_KEY. Search will not work.");
+}
+
+const ai = new GoogleGenAI({ apiKey: apiKey || 'missing-key' });
 
 /**
  * Step 1: Search for pain points using Grounding (Google Search)
@@ -57,9 +62,13 @@ export const searchPainPoints = async (topic: string): Promise<PainPointResult> 
       sources: sources
     };
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error searching pain points:", error);
-    throw new Error("Failed to search for pain points. Please try again.");
+    const errorMessage = error?.message || "Unknown error";
+    if (errorMessage.includes("API key")) {
+      throw new Error("Invalid or missing Gemini API Key. Please check your Vercel configurations.");
+    }
+    throw new Error(`Search failed: ${errorMessage}`);
   }
 };
 
@@ -122,9 +131,13 @@ export const generateAppIdeas = async (topic: string, painPointsSummary: string)
     const ideas = JSON.parse(response.text) as AppIdea[];
     return ideas;
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error generating ideas:", error);
-    throw new Error("Failed to generate app ideas.");
+    const errorMessage = error?.message || "Unknown error";
+    if (errorMessage.includes("API key")) {
+      throw new Error("Invalid or missing Gemini API Key.");
+    }
+    throw new Error(`Failed to generate app ideas: ${errorMessage}`);
   }
 };
 
@@ -192,8 +205,12 @@ export const generateBuildPlan = async (idea: AppIdea): Promise<BuildPlan> => {
 
     return JSON.parse(response.text) as BuildPlan;
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error generating build plan:", error);
-    throw new Error("Failed to generate build plan.");
+    const errorMessage = error?.message || "Unknown error";
+    if (errorMessage.includes("API key")) {
+      throw new Error("Invalid or missing Gemini API Key.");
+    }
+    throw new Error(`Failed to generate build plan: ${errorMessage}`);
   }
 };
